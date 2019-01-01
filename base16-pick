@@ -7,28 +7,32 @@ BASE16_SHELL="$HOME/.config/base16-shell/"
 eval "$("$BASE16_SHELL/profile_helper.sh")"
 
 function main {
+  if [[ "$1" == "" ]]; then
+    THEME=$( ( IFS=$'\n'; echo "${THEMES[*]}" ) | dmenu)
+  else
+    THEME=$1
+  fi
 
-  THEME=$( ( IFS=$'\n'; echo "${THEMES[*]}" ) | dmenu)
 
   # term
   _base16 "$HOME/.config/base16-shell/scripts/base16-$THEME.sh" "$THEME"
 
   # i3
-  get_i3_theme "$THEME" > "$HOME/.config/i3/colors"
-  cat \
-    "$HOME/.config/i3/base" \
-    "$HOME/.config/i3/colors" \
-    > "$HOME/.config/i3/config"
-  sed -i '/status_command/a mode hide\nmodifier None' ~/.config/i3/config
-  sed -E \
-    "s/(focused_workspace +) +\$base.. +(\$base..)(.*)/\1\2 \2\3/g" \
-    -i "$HOME/.config/i3/config"
+  i3-theme "$THEME" > "$HOME/.config/i3/colors"
+  i3-build-config
   i3-msg -q reload
 
 }
 
-function get_i3_theme {
-  cat "$HOME/git/base16-i3/themes/base16-$1.config"
+function i3-build-config {
+  cat "$HOME/.config/i3/base" "$HOME/.config/i3/colors" \
+    > "$HOME/.config/i3/config"
+}
+
+function i3-theme {
+  cat "$HOME/git/base16-i3/themes/base16-$1.config" \
+    | sed -E "s/(focused_workspace +) +\$base.. +(\$base..)(.*)/\1\2 \2\3/g" \
+    | sed '/status_command/a mode hide\nmodifier None'
 }
 
 THEMES=(
@@ -158,4 +162,4 @@ THEMES=(
   zenburn
 )
 
-main
+main "$@"
