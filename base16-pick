@@ -25,7 +25,7 @@ function main {
 }
 
 function i3-build-config {
-  cat "$HOME/.config/i3/base" "$HOME/.config/i3/colors" \
+  cat "$HOME/.config/i3/base" "$HOME/.config/i3/gaps" "$HOME/.config/i3/colors" \
     > "$HOME/.config/i3/config"
 }
 
