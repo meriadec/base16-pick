@@ -13,26 +13,36 @@ function main {
     THEME=$1
   fi
 
-
-  # term
-  _base16 "$HOME/.config/base16-shell/scripts/base16-$THEME.sh" "$THEME"
-
-  # i3
-  i3-theme "$THEME" > "$HOME/.config/i3/colors"
-  i3-build-config
-  i3-msg -q reload
-
+  shell-theme "$THEME"
+  kitty-theme "$THEME"
+  i3-theme "$THEME"
 }
 
-function i3-build-config {
-  cat "$HOME/.config/i3/base" "$HOME/.config/i3/gaps" "$HOME/.config/i3/colors" \
-    > "$HOME/.config/i3/config"
+function shell-theme {
+  _base16 \
+    "$HOME/.config/base16-shell/scripts/base16-$THEME.sh" \
+    "$1"
 }
 
 function i3-theme {
   cat "$HOME/git/base16-i3/themes/base16-$1.config" \
     | sed -E "s/(focused_workspace +) +\$base.. +(\$base..)(.*)/\1\2 \2\3/g" \
-    | sed '/status_command/a mode hide\nmodifier None'
+    | sed '/status_command/a mode hide\nmodifier None' \
+    >  "$HOME/.config/i3/colors"
+  cat "$HOME/.config/i3/base" "$HOME/.config/i3/gaps" "$HOME/.config/i3/colors" \
+    > "$HOME/.config/i3/config"
+  i3-msg -q reload
+}
+
+function kitty-theme {
+  if [[ -f "$HOME/git/base16-kitty/colors/base16-$1-256.conf" ]]; then
+    cat \
+      "$HOME/.config/kitty/base.conf" \
+      "$HOME/git/base16-kitty/colors/base16-$1-256.conf" \
+      > "$HOME/.config/kitty/kitty.conf"
+  else
+    echo "Could not find the kitty theme for $1"
+  fi
 }
 
 THEMES=(
